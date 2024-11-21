@@ -43,7 +43,7 @@ export default function ParkingOverview() {
   }, [])
 
   return (
-    <Card className="bg-gradient-to-br from-slate-50 to-slate-100">
+    <Card className="bg-white shadow-sm">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
@@ -67,17 +67,7 @@ export default function ParkingOverview() {
       </CardHeader>
       <CardContent>
         {/* Parking Layout */}
-        <div className="relative w-full aspect-[16/9] bg-white rounded-xl p-6 shadow-inner">
-          {/* Road */}
-          <div className="absolute inset-x-0 top-1/2 h-20 -translate-y-1/2 bg-slate-200 flex items-center">
-            <div className="w-full h-[4px] bg-yellow-400" />
-            <div className="absolute w-full flex justify-center gap-8">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="w-8 h-[2px] bg-white" />
-              ))}
-            </div>
-          </div>
-
+        <div className="relative w-full aspect-[16/9] bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 shadow-inner">
           {/* Parking Slots */}
           <div className="relative h-full grid grid-cols-3 gap-6">
             <AnimatePresence>

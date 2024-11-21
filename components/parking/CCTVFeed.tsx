@@ -74,7 +74,7 @@ export default function CCTVFeed() {
           </div>
           
           {/* AI Detection Overlay */}
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {mounted && detections.find(d => d.id === selectedCamera)?.lastDetection && (
               <motion.div
                 initial={{ opacity: 0, scale: 1.1 }}
@@ -121,7 +121,7 @@ export default function CCTVFeed() {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
         </div>
       </CardContent>
     </Card>
