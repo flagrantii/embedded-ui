@@ -19,32 +19,6 @@ export default function MonitoringPage() {
   //     data.push({id:doc.id , ...doc.data()})
   //   })
   // }
-  useEffect(() => {
-    const dataRef = ref(database, 'ultrasonic')
-    // get(dataRef).then((snapshot) => {
-    //   if(snapshot.exists()){
-    //     console.log(snapshot.val())
-    //   }
-    // })
-    const unsubscribe = onValue(
-      dataRef,
-      (snapshot) => {
-        if(snapshot.exists()){
-          const data = snapshot.val();
-          const sensorValues = Object.values(data)
-          console.log('sensor1',sensorValues[0])
-          console.log('sensor2',sensorValues[1])
-          console.log('sensor3',sensorValues[2])
-
-        }else{
-          console.log('No data')
-        }
-      },
-      (error) => {
-        console.error('Error Fetching Data', error)
-      }
-    )
-  })
   //const data = database
   return (
     <div className="container mx-auto p-6 space-y-6">
