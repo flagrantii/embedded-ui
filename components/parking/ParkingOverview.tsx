@@ -3,44 +3,83 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import type { ParkingSlot } from '@/types/sensors'
+import type { ParkingSlot, UltrasonicData } from '@/types/sensors'
 import { AlertCircle } from 'lucide-react'
 import Image from 'next/image'
+import { database } from '../../app/firebaseConfig'
+import { getDatabase, ref, get, onValue} from 'firebase/database'
+import { parse } from 'path'
+
 
 export default function ParkingOverview() {
   const [parkingSlots, setParkingSlots] = useState<ParkingSlot[]>([
     { 
       id: 'A1', 
-      occupied: true, 
-      distance: 5,
-      carInfo: { 
-        plateNumber: 'ABC123', 
-        entryTime: '14:30',
-        vehicleType: 'Sedan',
-        confidence: 0.95
-      }
+      occupied: false, 
+      distance: 0
     },
-    { id: 'A2', occupied: false, distance: 150 },
-    { id: 'A3', occupied: false, distance: 150 },
+    { id: 'A2', occupied: false, distance: 0 },
+    { id: 'A3', occupied: false, distance: 0 },
   ])
+
+  useEffect(() => {
+    const dataRef = ref(database, 'ultrasonic')
+    // get(dataRef).then((snapshot) => {
+    //   if(snapshot.exists()){
+    //     console.log(snapshot.val())
+    //   }
+    // })
+    const unsubscribe = onValue(
+      dataRef,
+      (snapshot) => {
+        if(snapshot.exists()){
+          const data = snapshot.val() as UltrasonicData; // Explicitly cast the data
+          const sensorValues = Object.values(data).map((value) =>
+            typeof value === 'string' ? parseInt(value, 10) : value
+          );
+
+          console.log('sensor1',sensorValues[0])
+          console.log('sensor2',sensorValues[1])
+          console.log('sensor3',sensorValues[2])
+          
+          setTimeout(() => {
+            setParkingSlots((prevSlots) =>
+              prevSlots.map((slot, index) => ({
+                ...slot,
+                distance: sensorValues[index] || 0, // Update distance from sensor
+                occupied: (sensorValues[index] || 0) < 5, // Mark occupied if distance < 5cm
+              }))
+            );
+          }, 300);
+
+          
+        }else{
+          console.log('No data')
+        }
+      },
+      (error) => {
+        console.error('Error Fetching Data', error)
+      }
+    )
+  })
 
   const [hoveredSlot, setHoveredSlot] = useState<string | null>(null)
 
   // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setParkingSlots(slots => 
-        slots.map(slot => ({
-          ...slot,
-          distance: slot.occupied ? 
-            Math.max(5, Math.random() * 10) : 
-            Math.max(150, Math.random() * 200)
-        }))
-      )
-    }, 2000)
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setParkingSlots(slots => 
+  //       slots.map(slot => ({
+  //         ...slot,
+  //         distance: slot.occupied ? 
+  //           Math.max(5, Math.random() * 10) : 
+  //           Math.max(150, Math.random() * 200)
+  //       }))
+  //     )
+  //   }, 2000)
 
-    return () => clearInterval(interval)
-  }, [])
+  //   return () => clearInterval(interval)
+  // }, [])
 
   return (
     <Card className="bg-white shadow-sm">
@@ -117,7 +156,7 @@ export default function ParkingOverview() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      {slot.distance < 50 ? (
+                      {slot.distance < 5 ? (
                         <span className="px-2 py-1 bg-white/80 rounded-lg backdrop-blur-sm text-red-600 flex items-center gap-1 shadow-sm">
                           <AlertCircle className="w-4 h-4" />
                           {slot.distance.toFixed(0)}cm

@@ -19,4 +19,11 @@ export interface CCTVData {
     vehicleType: string
     confidence: number
   }
-} 
+}
+
+export interface Distance {
+  id: string
+  distance: number
+}
+
+export type UltrasonicData = { [key: string]: number };
