@@ -1,65 +1,117 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useParkingHistory } from '@/hooks/useParkingHistory';
+import { ParkingRecord } from '@/types/sensors';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function ParkingStats() {
-  // Mock data for weekly stats
-  const weeklyData = [
-    { day: 'Mon', count: 65 },
-    { day: 'Tue', count: 59 },
-    { day: 'Wed', count: 80 },
-    { day: 'Thu', count: 81 },
-    { day: 'Fri', count: 56 },
-    { day: 'Sat', count: 55 },
-    { day: 'Sun', count: 40 }
-  ]
+  const slotIds = ['A1', 'A2', 'A3'];
+  const { records, clearParkingHistory } = useParkingHistory(slotIds);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  const maxCount = Math.max(...weeklyData.map(d => d.count))
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
-  return (
-    <>
+  // Calculate parking statistics
+  const stats = useMemo(() => {
+    // Filter records for today
+    const today = new Date().toDateString();
+    const todayRecords = records.filter(record => 
+      new Date(record.entryTime).toDateString() === today
+    );
+
+    // Total cars today (completed parking records)
+    const totalCarsToday = todayRecords.filter(record => 
+      record.status === 'completed'
+    ).length;
+
+    // Available slots (based on active records)
+    const occupiedSlots = records.filter(record => 
+      record.status === 'active'
+    ).map(record => record.slot);
+    const availableSlots = slotIds.length - occupiedSlots.length;
+
+    // Average parking time
+    const completedRecords = todayRecords.filter(record => 
+      record.status === 'completed' && record.duration
+    );
+    
+    const averageParkingTime = completedRecords.length > 0 
+      ? calculateAverageParkingTime(completedRecords)
+      : '0h 0m';
+
+    return {
+      totalCarsToday,
+      availableSlots,
+      averageParkingTime
+    };
+  }, [records, slotIds]);
+
+
+  if (!isHydrated) {
+    return (
       <Card>
         <CardHeader>
-          <CardTitle>Today&apos;s Statistics</CardTitle>
+          <CardTitle>Loading Parking Statistics...</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span>Total Cars Today</span>
-              <span className="text-2xl font-bold">45</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Available Slots</span>
-              <span className="text-2xl font-bold text-green-600">12</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Average Stay Time</span>
-              <span className="text-2xl font-bold">2.5h</span>
+              <span>Loading...</span>
             </div>
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Weekly Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col space-y-2">
-            {weeklyData.map((item) => (
-              <div key={item.day} className="flex items-center gap-2">
-                <span className="w-10">{item.day}</span>
-                <div className="flex-1 h-8 bg-slate-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-500/50 rounded-full transition-all duration-500"
-                    style={{ width: `${(item.count / maxCount) * 100}%` }}
-                  />
-                </div>
-                <span className="w-12 text-right">{item.count}</span>
-              </div>
-            ))}
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Today&apos;s Parking Statistics</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span>Total Cars Today</span>
+            <span className="text-2xl font-bold">{stats.totalCarsToday}</span>
           </div>
-        </CardContent>
-      </Card>
-    </>
+          <div className="flex justify-between items-center">
+            <span>Available Slots</span>
+            <span className="text-2xl font-bold text-green-600">{stats.availableSlots}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Average Stay Time</span>
+            <span className="text-2xl font-bold">{stats.averageParkingTime}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
-} 
+}
+
+// Utility function to calculate average parking time
+function calculateAverageParkingTime(records: ParkingRecord[]): string {
+  // Filter out records without a valid duration
+  const validRecords = records.filter(record => 
+    record.duration && record.status === 'completed'
+  );
+
+  // If no valid records, return default
+  if (validRecords.length === 0) {
+    return '0h 0m';
+  }
+
+  const totalMinutes = validRecords.reduce((sum, record) => {
+    const [hours, minutes] = record.duration!.split('h ').map(num => parseInt(num, 10));
+    return sum + (hours * 60) + minutes;
+  }, 0);
+
+  const averageMinutes = Math.round(totalMinutes / validRecords.length);
+  const averageHours = Math.floor(averageMinutes / 60);
+  const remainingMinutes = averageMinutes % 60;
+
+  return `${averageHours}h ${remainingMinutes}m`;
+}
