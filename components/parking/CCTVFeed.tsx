@@ -67,6 +67,7 @@ export default function CCTVFeed() {
       autoPlay={true}
       muted={false}
       />
+      <iframe src="http://192.168.51.82/" title="W3Schools Free Online Web Tutorials"></iframe>
       </Card>
   )
 } 
