@@ -4,70 +4,73 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { Camera, SignalHigh, Loader2 } from 'lucide-react'
 import type { CCTVData } from '@/types/sensors'
-import { format } from 'date-fns'
-import VideoPlayer from './VideoPlayer'
 
 export default function CCTVFeed() {
   const [selectedCamera, setSelectedCamera] = useState('cam1')
-  const [detections, setDetections] = useState<CCTVData[]>([])
-  const [mounted, setMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Initialize data after component mounts to prevent hydration mismatch
   useEffect(() => {
-    setDetections([{
-      id: 'cam1',
-      status: 'active',
-      lastDetection: {
-        plateNumber: 'ABC123',
-        timestamp: new Date().toISOString(),
-        vehicleType: 'Sedan',
-        confidence: 0.95
-      }
-    }])
-    setMounted(true)
-  }, [])
-
-  // Simulate AI detections
-  useEffect(() => {
-    if (!mounted) return
-
-    const interval = setInterval(() => {
-      setDetections(prev => prev.map(cam => ({
-        ...cam,
-        lastDetection: cam.id === selectedCamera ? {
-          plateNumber: 'ABC' + Math.floor(Math.random() * 999),
-          timestamp: new Date().toISOString(),
-          vehicleType: Math.random() > 0.5 ? 'Sedan' : 'SUV',
-          confidence: 0.8 + Math.random() * 0.2
-        } : cam.lastDetection
-      })))
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [selectedCamera, mounted])
-
-  // Format time consistently
-  const formatTime = (timestamp: string) => {
-    return format(new Date(timestamp), 'HH:mm:ss')
-  }
+    const timer = setTimeout(() => setIsLoading(false), 1500)
+    return () => clearTimeout(timer)
+  }, [selectedCamera])
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>CCTV Feed</CardTitle>
-        <Select value={selectedCamera} onValueChange={setSelectedCamera}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select camera" />
-          </SelectTrigger>
-        </Select>
+    <Card className="w-[800px] bg-gradient-to-br from-white to-slate-50 border-0 shadow-md overflow-hidden">
+      <CardHeader className="pb-2">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-row items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <Camera className="w-6 h-6 text-blue-500" />
+            <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+              CCTV Feed
+            </CardTitle>
+          </div>
+        </motion.div>
       </CardHeader>
-      <VideoPlayer 
-      src="http://192.168.51.82/" 
-      autoPlay={true}
-      muted={false}
-      />
-      <iframe src="http://192.168.51.82/" title="W3Schools Free Online Web Tutorials"></iframe>
-      </Card>
+
+      <CardContent className="p-4">
+        <motion.div 
+          className="relative h-[600px] rounded-xl overflow-hidden shadow-lg bg-black"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <motion.div
+                key="loader"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 flex items-center justify-center bg-slate-900/10 backdrop-blur-sm"
+              >
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
+          <iframe
+            src="http://192.168.51.82/"
+            title="CCTV"
+            className="w-full h-full border-none"
+          />
+
+          <motion.div 
+            className="absolute top-4 right-4 flex items-center gap-2 px-3 py-2 bg-black/50 backdrop-blur-sm rounded-full"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <SignalHigh className="w-4 h-4 text-green-400" />
+            <span className="text-sm text-white font-medium">Live</span>
+          </motion.div>
+        </motion.div>
+      </CardContent>
+    </Card>
   )
-} 
+}

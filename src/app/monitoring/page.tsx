@@ -1,35 +1,23 @@
 'use client'
-import { Suspense, useEffect, useState } from 'react'
+
+import { Suspense } from 'react'
 import ParkingOverview from '@/components/parking/ParkingOverview'
 import CCTVFeed from '@/components/parking/CCTVFeed'
 import ParkingStats from '@/components/parking/ParkingStats'
 import ParkingHistory from '@/components/parking/ParkingHistory'
 import { Skeleton } from '@/components/ui/skeleton'
-import { database } from '../firebaseConfig'
-import { getDatabase, ref, get, onValue} from 'firebase/database'
-import { collection,getDocs, QuerySnapshot } from 'firebase/firestore'
-import { da } from 'date-fns/locale'
+import Home from '@/components/parking/Home'
 
 export default function MonitoringPage() {
-  // async function fetch(){
-  //   const querySnapshot = await getDocs(collection(database,"ultrasonic/sensor1"))
-  //   const data = [];
-  //     querySnapshot.forEach((doc) => {
-  //     console.log(doc)
-  //     data.push({id:doc.id , ...doc.data()})
-  //   })
-  // }
-  //const data = database
   return (
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Parking Monitoring System</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* CCTV Feed Section */}
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <CCTVFeed />
-        </Suspense>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Home Section */}
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <Home />
+        </Suspense>
         {/* Parking Overview Section */}
         <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
           <ParkingOverview />
@@ -37,10 +25,18 @@ export default function MonitoringPage() {
       </div>
 
       {/* Statistics Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Suspense fallback={<Skeleton className="h-[200px] w-full" />}>
-          <ParkingStats />
-        </Suspense>
+      <div className="flex flex-row w-full gap-16">
+        <div className="flex-1">
+          <Suspense fallback={<Skeleton className="h-[200px] w-full" />}>
+            <ParkingStats />
+          </Suspense>
+        </div>
+
+        <div className="w-[800px] flex-shrink-0">
+          <Suspense fallback={<Skeleton className="h-[600px] w-[800px]" />}>
+            <CCTVFeed />
+          </Suspense>
+        </div>
       </div>
 
       {/* Parking History Section */}
@@ -49,4 +45,4 @@ export default function MonitoringPage() {
       </Suspense>
     </div>
   )
-} 
+}
