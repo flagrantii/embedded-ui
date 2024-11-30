@@ -13,6 +13,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "dashjs": "^4.7.4",
     "date-fns": "^4.1.0",
     "firebase": "^11.0.2",
     "fluent-ffmpeg": "^2.1.3",

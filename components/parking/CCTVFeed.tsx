@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import type { CCTVData } from '@/types/sensors'
 import { format } from 'date-fns'
+import VideoPlayer from './VideoPlayer'
 
 export default function CCTVFeed() {
   const [selectedCamera, setSelectedCamera] = useState('cam1')
@@ -59,71 +60,13 @@ export default function CCTVFeed() {
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select camera" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="cam1">Camera 1 - Main Entrance</SelectItem>
-            <SelectItem value="cam2">Camera 2 - Exit Gate</SelectItem>
-            <SelectItem value="cam3">Camera 3 - Parking Area</SelectItem>
-          </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* CCTV Feed Display */}
-        <div className="aspect-video bg-slate-900 rounded-lg relative overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-slate-400">CCTV Feed</p>
-          </div>
-          
-          {/* AI Detection Overlay */}
-          {/* <AnimatePresence>
-            {mounted && detections.find(d => d.id === selectedCamera)?.lastDetection && (
-              <motion.div
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-4 space-y-2"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold">AI Detection</span>
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="px-2 py-1 bg-green-500/20 text-green-300 rounded-full text-xs"
-                  >
-                    Live
-                  </motion.span>
-                </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-slate-400">Plate Number</p>
-                    <p className="font-mono">
-                      {detections.find(d => d.id === selectedCamera)?.lastDetection?.plateNumber}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400">Vehicle Type</p>
-                    <p>
-                      {detections.find(d => d.id === selectedCamera)?.lastDetection?.vehicleType}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400">Confidence</p>
-                    <p>
-                      {(detections.find(d => d.id === selectedCamera)?.lastDetection?.confidence! * 100).toFixed(1)}%
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400">Time</p>
-                    <p>
-                      {detections.find(d => d.id === selectedCamera)?.lastDetection?.timestamp && 
-                        formatTime(detections.find(d => d.id === selectedCamera)?.lastDetection?.timestamp!)}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence> */}
-        </div>
-      </CardContent>
-    </Card>
+      <VideoPlayer 
+      src="http://192.168.51.82/" 
+      autoPlay={true}
+      muted={false}
+      />
+      </Card>
   )
 } 

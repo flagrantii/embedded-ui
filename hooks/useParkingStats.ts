@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { ParkingStats } from '@/types/sensors';
-import { database } from '@/app/firebaseConfig';
+import { database } from '@/src/app/firebaseConfig';
 
 export function useParkingStats(path: string) {
   const [data, setData] = useState<number[]>([]);
