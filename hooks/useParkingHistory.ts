@@ -119,11 +119,17 @@ export function useParkingHistory(slotIds: string[]) {
 
   // Method to clear parking history
   const clearParkingHistory = () => {
-  const activeRecords = records.filter(record => record.status === 'active');
-  setRecords(activeRecords);
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('parkingHistory', JSON.stringify(activeRecords));
-  }
+    // Filter out records with 'completed' status
+    const activeRecords = records.filter(record => record.status !== 'completed');
+    console.log('Filtered records:', activeRecords); // Debug log
+    
+    // Force a new array reference
+    setRecords([...activeRecords]);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('parkingHistory'); // Clear first
+      localStorage.setItem('parkingHistory', JSON.stringify(activeRecords));
+    }
   };
 
   return { 
