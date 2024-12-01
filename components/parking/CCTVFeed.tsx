@@ -3,21 +3,44 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Camera, SignalHigh, Loader2, Maximize2, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import VideoPlayer from './VideoPlayer'
+
+// Add type for detection data
+interface DetectionData {
+  count: number;
+  detections: {
+    color: string;
+    confidence: number;
+    bbox?: [number, number, number, number]; // x, y, width, height
+  }[];
+}
 
 export default function CCTVFeed() {
   const [selectedCamera, setSelectedCamera] = useState('cam1')
   const [isLoading, setIsLoading] = useState(true)
   const [isMuted, setIsMuted] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [detectionData, setDetectionData] = useState<DetectionData | null>(null)
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500)
     return () => clearTimeout(timer)
   }, [selectedCamera])
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== "http://localhost:5000") return;
+      
+      if (event.data.type === 'detection') {
+        setDetectionData(event.data.payload);
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
 
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -28,6 +51,33 @@ export default function CCTVFeed() {
       setIsFullscreen(false)
     }
   }
+
+  // Add detection overlay with color information
+  const DetectionOverlay = () => {
+    if (!detectionData) return null;
+
+    return (
+      <div className="absolute top-0 left-0 p-2 bg-black/50 text-white rounded-br-lg">
+        <div className="text-sm font-medium mb-1">
+          Detected Vehicles: {detectionData.count}
+        </div>
+        <div className="space-y-1">
+          {detectionData.detections.map((detection, index) => (
+            <div key={index} className="flex items-center gap-2 text-xs">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: detection.color }}
+              />
+              <span>{detection.color}</span>
+              <span className="text-gray-300">
+                {Math.round(detection.confidence * 100)}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Card className="w-full bg-gradient-to-br from-white to-slate-50 border-0 shadow-md overflow-hidden">
@@ -68,10 +118,13 @@ export default function CCTVFeed() {
           </AnimatePresence>
 
           <iframe
-            src="http://192.168.51.82/"
+            src="http://localhost:5000/video_feed"
             title="CCTV"
             className="w-full h-full border-none"
+            allow="camera"
           />
+
+          <DetectionOverlay />
 
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
             <div className="flex justify-between items-center">

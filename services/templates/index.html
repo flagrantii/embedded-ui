@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vehicle Detection Stream</title>
+    <script>
+        function sendDetectionData(data) {
+            window.parent.postMessage(data, '*');
+        }
+        
+        // Handle incoming video stream and detection data
+        const eventSource = new EventSource('/video_feed');
+        eventSource.onmessage = function(event) {
+            if (event.data.startsWith('--frame')) {
+                // Handle video frame
+                const imgData = event.data.split('\r\n')[3];
+                document.getElementById('video').src = 'data:image/jpeg;base64,' + imgData;
+            } else {
+                // Handle detection data
+                try {
+                    const detectionData = JSON.parse(event.data);
+                    sendDetectionData(detectionData);
+                } catch (e) {
+                    console.error('Error parsing detection data:', e);
+                }
+            }
+        };
+    </script>
+</head>
+<body style="margin: 0; padding: 0;">
+    <img id="video" style="width: 100%; height: 100%; object-fit: cover;" />
+</body>
+</html> 
