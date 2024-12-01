@@ -38,8 +38,8 @@ export default function CCTVFeed() {
           className="flex flex-row items-center justify-between"
         >
           <div className="flex items-center gap-3">
-            <Camera className="w-6 h-6 text-blue-500" />
-            <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+            <Camera className="w-6 h-6 text-green-600" />
+            <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-green-800">
               CCTV Feed
             </CardTitle>
           </div>

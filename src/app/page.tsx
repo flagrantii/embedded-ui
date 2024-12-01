@@ -28,7 +28,7 @@ export default function HomePage() {
             className="max-w-4xl mx-auto space-y-8"
           >
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-green-800">
                 Smart Parking
               </span>
               <br />
@@ -49,7 +49,7 @@ export default function HomePage() {
               <Link href="/monitoring" className="w-full sm:w-auto">
                 <Button 
                   size="lg" 
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-lg h-12 px-8"
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-lg h-12 px-8"
                 >
                   Launch Dashboard
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -81,7 +81,7 @@ export default function HomePage() {
             aria-label="Scroll to features"
           >
             <div className="animate-bounce p-2 rounded-full bg-white/90 shadow-lg group-hover:shadow-xl transition-all duration-300">
-              <ArrowDown className="w-6 h-6 text-blue-600" />
+              <ArrowDown className="w-6 h-6 text-green-600" />
             </div>
           </button>
         </motion.div>
@@ -134,8 +134,8 @@ export default function HomePage() {
 
 const features = [
   {
-    icon: <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Car className="w-6 h-6 text-blue-600" />
+    icon: <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+            <Car className="w-6 h-6 text-green-600" />
           </div>,
     title: "Vehicle Detection",
     description: "Real-time monitoring of vehicle entry and exit with advanced sensors"
