@@ -4,30 +4,38 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback } from 'react'
-import { Camera, SignalHigh, Loader2, Maximize2, Volume2, VolumeX } from 'lucide-react'
+import { Camera, SignalHigh, Loader2, Maximize2, Volume2, VolumeX, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-// Add type for detection data
+// Add type for feed options
+type FeedType = 'normal' | 'ai';
+
 interface DetectionData {
   count: number;
   detections: {
     color: string;
     confidence: number;
-    bbox?: [number, number, number, number]; // x, y, width, height
+    bbox?: [number, number, number, number];
   }[];
 }
 
 export default function CCTVFeed() {
-  const [selectedCamera, setSelectedCamera] = useState('cam1')
+  const [selectedFeed, setSelectedFeed] = useState<FeedType>('normal')
   const [isLoading, setIsLoading] = useState(true)
   const [isMuted, setIsMuted] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [detectionData, setDetectionData] = useState<DetectionData | null>(null)
 
+  // Update feed URLs
+  const feedUrls = {
+    normal: 'http://192.168.51.82/',
+    ai: 'http://localhost:5000/video_feed'
+  }
+
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500)
     return () => clearTimeout(timer)
-  }, [selectedCamera])
+  }, [selectedFeed])
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -38,9 +46,11 @@ export default function CCTVFeed() {
       }
     }
 
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [])
+    if (selectedFeed === 'ai') {
+      window.addEventListener('message', handleMessage)
+      return () => window.removeEventListener('message', handleMessage)
+    }
+  }, [selectedFeed])
 
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -52,9 +62,8 @@ export default function CCTVFeed() {
     }
   }
 
-  // Add detection overlay with color information
   const DetectionOverlay = () => {
-    if (!detectionData) return null;
+    if (!detectionData || selectedFeed !== 'ai') return null;
 
     return (
       <div className="absolute top-0 left-0 p-2 bg-black/50 text-white rounded-br-lg">
@@ -80,7 +89,7 @@ export default function CCTVFeed() {
   };
 
   return (
-    <Card className="w-full bg-gradient-to-br from-white to-slate-50 border-0 shadow-md overflow-hidden">
+    <Card className="w-full bg-gradient-to-br from-white to-slate-50 border-green-100 shadow-md overflow-hidden">
       <CardHeader className="pb-2">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -88,11 +97,37 @@ export default function CCTVFeed() {
           className="flex flex-row items-center justify-between"
         >
           <div className="flex items-center gap-3">
-            <Camera className="w-6 h-6 text-blue-500" />
-            <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+            <Camera className="w-6 h-6 text-green-600" />
+            <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-green-800">
               CCTV Feed
             </CardTitle>
           </div>
+
+          <Select
+            value={selectedFeed}
+            onValueChange={(value: FeedType) => {
+              setIsLoading(true)
+              setSelectedFeed(value)
+            }}
+          >
+            <SelectTrigger className="w-[180px] border-green-200">
+              <SelectValue placeholder="Select feed type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="normal" className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-green-600" />
+                  <span>Normal CCTV</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="ai">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-green-600" />
+                  <span>AI Detection</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </motion.div>
       </CardHeader>
 
@@ -118,7 +153,7 @@ export default function CCTVFeed() {
           </AnimatePresence>
 
           <iframe
-            src="http://localhost:5000/video_feed"
+            src={feedUrls[selectedFeed]}
             title="CCTV"
             className="w-full h-full border-none"
             allow="camera"
