@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+
+module.exports = {
+  webpack: (config) => {
+    config.resolve.alias['hls.js'] = 'hls.js/dist/hls.min.js';
+    return config;
+  },
   reactStrictMode: true,
   experimental: {
     appDir: true,
   },
 }
-
-module.exports = nextConfig 
